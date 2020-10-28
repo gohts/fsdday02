@@ -1,22 +1,29 @@
 // load libraries
 const express = require('express');
-const hbs = require('express-handlebars')
+const handlebars = require('express-handlebars')
+
+const roll_dice = () => Math.ceil(Math.random() * 5);
 
 // configure environment
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000;
+
+// create an instance of express
 const app = express();
 
-app.engine('hbs', hbs({defaultLayout : 'default.hbs'}));
+// configure HBS
+app.engine('hbs', handlebars({defaultLayout : 'default.hbs'}));
 app.set('view engine', 'hbs');
 
-// routings
-app.get('/', function (req, res) {
+// configure express
+app.get(['/', '/index.html'], function (req, res) {
+    res.status(200);
+    res.type('text/html');
     res.render('home');
 });
 
 app.get('/roll', function (req, res) {
-    let diceVal1 = Math.ceil(Math.random() * 5);
-    let diceVal2 = Math.ceil(Math.random() * 5);
+    let diceVal1 = roll_dice();
+    let diceVal2 = roll_dice();
     res.render('roll', {
         dice1 : diceVal1,
         dice2 : diceVal2,
@@ -25,15 +32,14 @@ app.get('/roll', function (req, res) {
     });
 });
 
-// static file
+// load or mount the static resources directory
 app.use(express.static(__dirname + '/public'));
 
-app.get('*', (req,res) => {
-    // res.type = 'text/html';
+app.use((req,res) => {
     res.redirect('/');
 });
 
-// initialize app
+// start express
 app.listen(PORT, () => {
     console.info(`Application started at PORT: ${PORT} on ${new Date()}`);
 })
